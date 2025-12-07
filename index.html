@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>wavy lines</title>
+  <style>
+    body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(ellipse at top, #1e3a5f 0%, #1a1a2e 50%, #0f0f1e 100%);
+      overflow: hidden;
+    }
+
+    a-waves {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    a-waves svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    a-waves svg path {
+      stroke: none;
+      stroke-width: 0;
+    }
+
+    .title {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 108px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      letter-spacing: 7.2px;
+      margin: 0;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .subtitle {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, 72px);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 21.6px;
+      font-weight: 300;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      letter-spacing: 1.8px;
+      margin: 0;
+      user-select: none;
+      z-index: 10;
+      opacity: 0.9;
+    }
+
+    .buttons {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, 162px);
+      display: flex;
+      gap: 27px;
+      z-index: 10;
+    }
+
+    .btn {
+      padding: 14.4px 40.5px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 16.2px;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(35px) saturate(200%);
+      -webkit-backdrop-filter: blur(35px) saturate(200%);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.6);
+      z-index: 10;
+      letter-spacing: 0.5px;
+    }
+
+    .footer a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-weight: 400;
+    }
+
+    .footer a:hover {
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 class="title">UTheme</h1>
+  <p class="subtitle">An all-in-one theme downloader for your Wii U</p>
+  <div class="buttons">
+    <a href="#" class="btn">Download (.wuhb)</a>
+    <a href="#" class="btn">View Source Code</a>
+  </div>
+  <div class="footer">
+    UTheme powered by <a href="https://themezer.net" target="_blank">Themezer</a> API
+  </div>
+  <a-waves>
+    <svg></svg>
+  </a-waves>
+</body>
+
+<script>
+  // JIEJOE produce
+  // b站主页：https://space.bilibili.com/3546390319860710
+  class AWaves extends HTMLElement {
+    connectedCallback() {
+      this.svg = this.querySelector('svg')
+      this.time = 0
+      this.waves = []
+      this.mouse = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        lx: window.innerWidth / 2,
+        ly: window.innerHeight / 2,
+        v: 0
+      }
+
+      this.bindEvents()
+      this.setSize()
+      this.createWaves()
+
+      requestAnimationFrame(this.tick.bind(this))
+    }
+    bindEvents() {
+      window.addEventListener('resize', () => {
+        this.setSize()
+        this.createWaves()
+      })
+      window.addEventListener('mousemove', (e) => {
+        this.mouse.x = e.clientX
+        this.mouse.y = e.clientY
+      })
+      window.addEventListener('touchmove', (e) => {
+        this.mouse.x = e.touches[0].clientX
+        this.mouse.y = e.touches[0].clientY
+      })
+    }
+    setSize() {
+      this.width = window.innerWidth
+      this.height = window.innerHeight
+      this.svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`)
+    }
+    
+    createWaves() {
+      // 清空旧的波浪
+      this.svg.innerHTML = ''
+      this.waves = []
+
+      // 创建海浪层 - 从底部向上
+      const waveCount = 5
+      const colors = [
+        { color: '#0a3d62', opacity: 0.8 },
+        { color: '#0e5a8a', opacity: 0.7 },
+        { color: '#1e88c7', opacity: 0.6 },
+        { color: '#3da5e0', opacity: 0.5 },
+        { color: '#60c5f1', opacity: 0.4 }
+      ]
+
+      for (let i = 0; i < waveCount; i++) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        const colorInfo = colors[i]
+        path.setAttribute('fill', colorInfo.color)
+        path.setAttribute('opacity', colorInfo.opacity)
+        this.svg.appendChild(path)
+        
+        // 为每个波浪创建点数组
+        const points = []
+        const pointCount = 150
+        for (let j = 0; j <= pointCount; j++) {
+          points.push({
+            x: (this.width / pointCount) * j,
+            offset: 0,
+            velocity: 0
+          })
+        }
+        
+        this.waves.push({
+          path: path,
+          amplitude: 20 + i * 8,
+          frequency: 0.004 + i * 0.0008,
+          speed: 0.02 + i * 0.01,
+          yOffset: this.height * 0.85 - i * 60,
+          points: points,
+          index: i
+        })
+      }
+    }
+    
+    drawWave(wave, time) {
+      let pathData = ''
+      
+      // 从左边界开始
+      pathData = `M 0 ${this.height}`
+      
+      // 收集所有点的Y坐标
+      const yCoords = []
+      
+      wave.points.forEach((point, i) => {
+        // 基础波浪
+        let y = wave.yOffset + 
+                Math.sin((point.x * wave.frequency) + (time * wave.speed)) * wave.amplitude +
+                Math.sin((point.x * wave.frequency * 1.5) - (time * wave.speed * 0.7)) * (wave.amplitude * 0.3)
+        
+        // 鼠标推动效果
+        const dx = point.x - this.mouse.x
+        const dy = y - this.mouse.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        const influenceRadius = 250
+        
+        if (distance < influenceRadius && this.mouse.v > 0.1) {
+          const force = (1 - distance / influenceRadius) * this.mouse.v * 0.3
+          const angle = Math.atan2(dy, dx)
+          point.velocity -= Math.sin(angle) * force
+        }
+        
+        // 物理效果
+        point.velocity += (0 - point.offset) * 0.008
+        point.velocity *= 0.95
+        point.offset += point.velocity
+        point.offset = Math.max(-50, Math.min(50, point.offset))
+        
+        y += point.offset
+        yCoords.push(y)
+      })
+      
+      // 使用贝塞尔曲线绘制平滑路径
+      pathData += ` L 0 ${yCoords[0]}`
+      
+      for (let i = 0; i < wave.points.length; i++) {
+        const point = wave.points[i]
+        const y = yCoords[i]
+        
+        if (i === 0) {
+          pathData += ` L ${point.x} ${y}`
+        } else {
+          // 使用二次贝塞尔曲线平滑连接
+          const prevPoint = wave.points[i - 1]
+          const prevY = yCoords[i - 1]
+          const cpX = (prevPoint.x + point.x) / 2
+          const cpY = (prevY + y) / 2
+          pathData += ` Q ${prevPoint.x} ${prevY}, ${cpX} ${cpY}`
+          
+          if (i === wave.points.length - 1) {
+            pathData += ` Q ${cpX} ${cpY}, ${point.x} ${y}`
+          }
+        }
+      }
+      
+      // 闭合路径
+      pathData += ` L ${this.width} ${this.height} Z`
+      
+      wave.path.setAttribute('d', pathData)
+    }
+    tick(time) {
+      this.time += 0.05
+      
+      // 计算鼠标速度
+      const dx = this.mouse.x - this.mouse.lx
+      const dy = this.mouse.y - this.mouse.ly
+      this.mouse.v = Math.sqrt(dx * dx + dy * dy)
+      this.mouse.lx = this.mouse.x
+      this.mouse.ly = this.mouse.y
+      
+      this.waves.forEach(wave => {
+        this.drawWave(wave, this.time)
+      })
+
+      requestAnimationFrame(this.tick.bind(this))
+    }
+  }
+
+  customElements.define('a-waves', AWaves)
+</script>
+
+</html>
